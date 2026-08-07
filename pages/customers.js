@@ -27,7 +27,7 @@ Pages.customers = function() {
           const hasActivePlan = c.activePlans > 0;
           return `<tr class="cust-row" data-search="${(c.name+' '+(c.phone||'')+' '+(c.email||'')+' '+(c.address||'')).toLowerCase()}">
             <td>
-              <a href="#" onclick="Customers.detail('${c.id}');return false" style="color:var(--navy);font-weight:600;text-decoration:none">${App.esc(c.name)}</a>
+              <a href="#" onclick="CustomerDetail.view('${c.id}');return false" style="color:var(--navy);font-weight:600;text-decoration:none">${App.esc(c.name)}</a>
               ${isVIP ? ' <span class="badge badge-success" style="font-size:10px">⭐ VIP</span>' : ''}
               ${isRepeat ? ' <span class="badge badge-info" style="font-size:10px">🔄 Repeat</span>' : ''}
               ${hasActivePlan ? ' <span class="badge badge-warning" style="font-size:10px">🔧 Plan</span>' : ''}
