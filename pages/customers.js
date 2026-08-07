@@ -68,17 +68,35 @@ const Customers = {
     const totalSpent = paidInvs.reduce((s,i) => s + (i.total||0), 0);
     const unpaidInvs = invs.filter(i => i.status !== 'paid');
     const outstanding = unpaidInvs.reduce((s,i) => s + (i.total||0), 0);
+    const plans = (App.state.maintenancePlans||[]).filter(p => p.customer === c.name);
+    const followUps = (App.state.followUps||[]).filter(f => f.customerName === c.name);
+
+    // Build unified timeline
+    const timeline = [];
+    jobs.forEach(j => timeline.push({ date: j.date, type: 'job', icon: '🔧', label: j.title, status: j.status, id: j.id }));
+    quotes.forEach(q => timeline.push({ date: q.date, type: 'quote', icon: '📋', label: `Quote #${q.number} — ${App.formatCurrency(q.total)}`, status: q.status, id: q.id }));
+    invs.forEach(i => timeline.push({ date: i.date, type: 'invoice', icon: '💰', label: `Invoice #${i.number} — ${App.formatCurrency(i.total)}`, status: i.status, id: i.id }));
+    timeline.sort((a,b) => b.date.localeCompare(a.date));
+
+    // Stats
+    const avgJobValue = paidInvs.length > 0 ? totalSpent / paidInvs.length : 0;
+    const lastService = jobs.find(j => j.status === 'completed');
+    const daysSince = lastService ? Math.floor((Date.now() - new Date(lastService.date).getTime()) / 86400000) : null;
+    const isVIP = totalSpent >= 2000;
+    const custNum = c.customerId || (c.customerId = 'C-' + String(App.state.customers.indexOf(c) + 1).padStart(4, '0'));
+    App.saveState(); // persist the ID
 
     App.openModal(`
-      <div class="modal-header"><h3>${App.esc(c.name)}</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-        <div><strong>Phone:</strong><br>${c.phone||'—'}</div>
-        <div><strong>Email:</strong><br>${c.email||'—'}</div>
-        <div><strong>Address:</strong><br>${c.address ? App.googleMapsLink(c.address) : '—'}</div>
-        <div><strong>Total Paid:</strong><br><span style="color:var(--success);font-weight:700">${App.formatCurrency(totalSpent)}</span></div>
-        ${outstanding > 0 ? `<div><strong>Outstanding:</strong><br><span style="color:var(--danger);font-weight:700">${App.formatCurrency(outstanding)}</span></div>` : ''}
+      <div class="modal-header">
+        <h3>${App.esc(c.name)} ${isVIP ? '<span class="badge badge-success" style="font-size:11px">⭐ VIP</span>' : ''}</h3>
+        <button class="modal-close" onclick="App.closeModal()">✕</button>
       </div>
-      ${c.notes ? `<div style="margin-bottom:16px;padding:12px;background:var(--bg);border-radius:8px"><strong>Notes:</strong> ${c.notes}</div>` : ''}
+
+      <!-- Customer ID & Contact -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+        <span style="background:var(--bg);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;color:var(--text-muted)">ID: ${custNum}</span>
+        ${plans.length > 0 ? `<span class="badge badge-success">🔧 ${plans.length} Maintenance Plan${plans.length>1?'s':''}</span>` : ''}
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
         ${c.phone ? `<button class="btn btn-sm btn-outline" onclick="window.open('tel:${c.phone}')">📞 Call</button>` : ''}
         ${c.phone ? `<button class="btn btn-sm btn-outline" onclick="window.open('sms:${c.phone.replace(/\D/g,'')}?body=${encodeURIComponent('Hi '+c.name+', this is '+App.getBusinessInfo().contact+' from '+App.getBusinessInfo().name+'. ')}')">📱 Text</button>` : ''}
@@ -86,31 +104,62 @@ const Customers = {
         ${c.address ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address)}" target="_blank" class="btn btn-sm btn-outline">📍 Directions</a>` : ''}
       </div>
 
-      ${jobs.length > 0 ? `
-      <h4 style="margin:16px 0 8px;color:var(--navy)">Jobs (${jobs.length})</h4>
-      <table style="width:100%"><thead><tr><th>Date</th><th>Title</th><th>Status</th></tr></thead><tbody>
-        ${jobs.map(j => `<tr><td>${App.formatDate(j.date)}</td><td>${j.title}</td>
-          <td><span class="badge badge-${j.status==='completed'?'success':j.status==='in-progress'?'info':'warning'}">${j.status||'scheduled'}</span></td></tr>`).join('')}
-      </tbody></table>` : ''}
+      <!-- Stats Grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:16px">
+        <div style="text-align:center;padding:12px;background:var(--bg);border-radius:8px">
+          <div style="font-size:20px;font-weight:700;color:var(--success)">${App.formatCurrency(totalSpent)}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Total Spent</div>
+        </div>
+        ${outstanding > 0 ? `<div style="text-align:center;padding:12px;background:var(--bg);border-radius:8px">
+          <div style="font-size:20px;font-weight:700;color:var(--danger)">${App.formatCurrency(outstanding)}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Outstanding</div>
+        </div>` : ''}
+        <div style="text-align:center;padding:12px;background:var(--bg);border-radius:8px">
+          <div style="font-size:20px;font-weight:700;color:var(--navy)">${jobs.length}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Total Jobs</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--bg);border-radius:8px">
+          <div style="font-size:20px;font-weight:700;color:var(--navy)">${App.formatCurrency(avgJobValue)}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Avg Value</div>
+        </div>
+        ${daysSince !== null ? `<div style="text-align:center;padding:12px;background:var(--bg);border-radius:8px">
+          <div style="font-size:20px;font-weight:700;color:${daysSince > 365 ? 'var(--danger)' : daysSince > 180 ? 'var(--warning)' : 'var(--navy)'}">${daysSince}d</div>
+          <div style="font-size:11px;color:var(--text-muted)">Since Last</div>
+        </div>` : ''}
+      </div>
 
-      ${quotes.length > 0 ? `
-      <h4 style="margin:16px 0 8px;color:var(--navy)">Quotes (${quotes.length})</h4>
-      <table style="width:100%"><thead><tr><th>#</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody>
-        ${quotes.map(q => `<tr><td>#${q.number}</td><td>${App.formatDate(q.date)}</td><td>${App.formatCurrency(q.total)}</td>
-          <td><span class="badge badge-${q.status==='accepted'?'success':q.status==='sent'?'info':'warning'}">${q.status}</span></td></tr>`).join('')}
-      </tbody></table>` : ''}
+      <!-- Contact Info -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;font-size:13px">
+        <div><strong>Phone:</strong> ${c.phone||'—'}</div>
+        <div><strong>Email:</strong> ${c.email||'—'}</div>
+        <div style="grid-column:1/-1"><strong>Address:</strong> ${c.address||'—'}</div>
+      </div>
+      ${c.notes ? `<div style="margin-bottom:16px;padding:10px;background:var(--bg);border-radius:8px;font-size:13px"><strong>Notes:</strong> ${c.notes}</div>` : ''}
 
-      ${invs.length > 0 ? `
-      <h4 style="margin:16px 0 8px;color:var(--navy)">Invoices (${invs.length})</h4>
-      <table style="width:100%"><thead><tr><th>#</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody>
-        ${invs.map(i => `<tr><td>#${i.number}</td><td>${App.formatDate(i.date)}</td><td>${App.formatCurrency(i.total)}</td>
-          <td><span class="badge badge-${i.status==='paid'?'success':i.status==='overdue'?'danger':'warning'}">${i.status}</span></td></tr>`).join('')}
-      </tbody></table>` : ''}
+      <!-- Timeline -->
+      ${timeline.length > 0 ? `
+      <h4 style="margin:16px 0 8px;color:var(--navy)">📅 History (${timeline.length})</h4>
+      <div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+        <table style="width:100%;font-size:13px"><tbody>
+          ${timeline.map(t => `<tr>
+            <td style="width:20px;text-align:center">${t.icon}</td>
+            <td>${App.formatDate(t.date)}</td>
+            <td>${t.label}</td>
+            <td><span class="badge badge-${t.status==='completed'||t.status==='paid'||t.status==='accepted'?'success':t.status==='overdue'||t.status==='cancelled'?'danger':'warning'}">${t.status}</span></td>
+          </tr>`).join('')}
+        </tbody></table>
+      </div>` : '<p style="color:var(--text-muted);text-align:center;padding:16px">No history yet</p>'}
 
-      ${jobs.length===0 && quotes.length===0 && invs.length===0 ? '<p style="color:var(--text-muted);text-align:center;padding:16px">No history yet</p>' : ''}
+      <!-- Follow-ups -->
+      ${followUps.length > 0 ? `
+      <h4 style="margin:16px 0 8px;color:var(--navy)">📧 Follow-ups (${followUps.length})</h4>
+      <table style="width:100%;font-size:13px"><tbody>
+        ${followUps.map(f => `<tr><td>${App.formatDate(f.dueDate||f.createdAt)}</td><td>${f.type||'general'}</td><td><span class="badge badge-${f.status==='sent'?'success':'warning'}">${f.status}</span></td></tr>`).join('')}
+      </tbody></table>` : ''}
 
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="App.closeModal()">Close</button>
+        <button class="btn btn-outline" onclick="App.closeModal();Scheduler.newForCustomer('${App.esc(c.name)}')">📅 New Job</button>
         <button class="btn btn-primary" onclick="App.closeModal();Customers.edit('${c.id}')">Edit Customer</button>
       </div>
     `);
