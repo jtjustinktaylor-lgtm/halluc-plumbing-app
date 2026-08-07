@@ -3,6 +3,10 @@ Pages.settings = function() {
   const formspree = App.state.formspreeEndpoint || '';
   const backups = App.getBackupInfo();
   const stateSize = (JSON.stringify(App.state).length / 1024).toFixed(1);
+  const storageLimit = 5120; // 5MB typical localStorage limit
+  const usagePercent = (stateSize / storageLimit * 100).toFixed(1);
+  const isWarning = usagePercent > 60;
+  const isCritical = usagePercent > 80;
   const totalCustomers = (App.state.customers || []).length;
   const totalInvoices = (App.state.invoices || []).length;
   const totalQuotes = (App.state.quotes || []).length;
@@ -70,7 +74,11 @@ Pages.settings = function() {
           <div class="stat-label">Jobs</div>
         </div>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-top:8px">Storage used: ${stateSize} KB</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px">Storage used: ${stateSize} KB of ~5 MB (${usagePercent}%)</p>
+      <div style="margin-top:8px;background:var(--border,#e0e0e0);border-radius:4px;height:8px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(usagePercent, 100)}%;background:${isCritical ? 'var(--danger,#dc3545)' : isWarning ? 'var(--warning,#e5a500)' : 'var(--success,#28a745)'};border-radius:4px;transition:width 0.3s"></div>
+      </div>
+      ${isCritical ? '<p style="color:var(--danger,#dc3545);font-size:12px;margin-top:6px">⚠️ Storage nearly full! Export data and clear old records to free space. Consider backing up and removing old jobs/invoices.</p>' : isWarning ? '<p style="color:var(--warning,#e5a500);font-size:12px;margin-top:6px">⚡ Storage getting full. Export data periodically to stay safe.</p>' : ''}
     </div>
 
     <!-- Quick Danger Zone -->
