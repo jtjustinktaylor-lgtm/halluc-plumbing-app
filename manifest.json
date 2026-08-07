@@ -1,0 +1,17 @@
+{
+  "name": "Halluc Plumbing \u2014 Business Manager",
+  "short_name": "Halluc Plumbing",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1a2332",
+  "theme_color": "#D4AF37",
+  "description": "Business management app for Halluc Plumbing",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
