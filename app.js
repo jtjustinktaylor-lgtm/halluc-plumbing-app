@@ -312,7 +312,7 @@ const App = {
       'nav-icon-invoices': 'invoices', 'nav-icon-scheduler': 'scheduler',
       'nav-icon-rates': 'rates', 'nav-icon-customers': 'customers',
       'nav-icon-tracker': 'tracker', 'nav-icon-maintenance': 'maintenance',
-      'nav-icon-discounts': 'discounts', 'nav-icon-quote-request': 'quoteRequest', 'nav-icon-warranty': 'warranty', 'nav-icon-followups': 'scheduler', 'nav-icon-eod': 'dashboard', 'nav-icon-settings': 'rates', 'nav-icon-mileage': 'tracker', 'nav-icon-inventory': 'tracker', 'cmd-icon': 'search',
+      'nav-icon-discounts': 'discounts', 'nav-icon-quote-request': 'quoteRequest', 'nav-icon-warranty': 'warranty', 'nav-icon-followups': 'scheduler', 'nav-icon-eod': 'dashboard', 'nav-icon-settings': 'rates', 'nav-icon-mileage': 'tracker', 'nav-icon-inventory': 'tracker', 'nav-icon-export': 'invoices', 'cmd-icon': 'search',
     };
     Object.entries(iconMap).forEach(([elId, iconName]) => {
       const el = document.getElementById(elId);
@@ -401,6 +401,8 @@ const App = {
       { id: 'inventory', label: 'Inventory', hint: 'Parts & supplies tracking' },
       { id: 'discounts', label: 'Discounts', hint: 'Promotions & deals' },
       { id: 'settings', label: 'Settings', hint: 'Backup, Formspree, config' },
+      { id: 'export', label: 'Export', hint: 'QuickBooks & Xero export' },
+      { id: 'storage', label: 'Storage Manager', hint: 'Monitor & clean localStorage' },
     ];
 
     const actions = [
