@@ -81,6 +81,18 @@ Pages.settings = function() {
       ${isCritical ? '<p style="color:var(--danger,#dc3545);font-size:12px;margin-top:6px">⚠️ Storage nearly full! Export data and clear old records to free space. Consider backing up and removing old jobs/invoices.</p>' : isWarning ? '<p style="color:var(--warning,#e5a500);font-size:12px;margin-top:6px">⚡ Storage getting full. Export data periodically to stay safe.</p>' : ''}
     </div>
 
+    <!-- Quick Tools -->
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="margin-bottom:12px">🧰 Quick Tools</h3>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px">
+        Accounting exports and storage management.
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="window.location.hash='export'">📤 Export for QuickBooks/Xero</button>
+        <button class="btn btn-outline" onclick="window.location.hash='storage'">💾 Storage Manager</button>
+      </div>
+    </div>
+
     <!-- Quick Danger Zone -->
     <div class="card" style="border-color:var(--danger,#dc3545)">
       <h3 style="margin-bottom:12px;color:var(--danger,#dc3545)">⚠️ Danger Zone</h3>
