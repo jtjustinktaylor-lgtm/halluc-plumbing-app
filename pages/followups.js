@@ -147,14 +147,17 @@ const FollowUps = {
     const cust = (App.state.customers || []).find(c => c.name === fu.customerName);
     const email = cust?.email || '';
     const phone = cust?.phone || '';
-    if (email) {
-      const body = `Hi ${fu.customerName},\n\nJust following up on the recent plumbing work we did for you. Everything going well?\n\nIf you have any questions or concerns, don't hesitate to reach out.\n\nIf you're happy with our work, we'd really appreciate a Google review — it helps us a lot as a small local business.\n\nThanks for choosing ${biz.name}!\n\n${biz.contact}\n${biz.phone}`;
-      window.open(`mailto:${email}?subject=Following Up — ${biz.name}&body=${encodeURIComponent(body)}`);
-    } else if (phone) {
-      window.open(`tel:${phone}`);
-    } else {
-      App.toast('No contact info for ' + fu.customerName, 'warning');
-    }
+    const body = `Hi ${fu.customerName},\n\nJust following up on the recent plumbing work we did for you. Everything going well?\n\nIf you have any questions or concerns, don't hesitate to reach out.\n\nIf you're happy with our work, we'd really appreciate a Google review — it helps us a lot as a small local business.\n\nThanks for choosing ${biz.name}!\n\n${biz.contact}\n${biz.phone}`;
+    // Show contact options
+    App.openModal(`
+      <div class="modal-header"><h3>Contact ${App.esc(fu.customerName)}</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
+      <div style="display:flex;flex-direction:column;gap:12px;padding:16px 0">
+        ${email ? `<button class="btn btn-outline" onclick="window.open('mailto:${email}?subject=Following Up — ${biz.name}&body=${encodeURIComponent(body)}');App.closeModal()">📧 Email</button>` : ''}
+        ${phone ? `<button class="btn btn-outline" onclick="window.open('sms:${phone.replace(/\D/g,'')}?body=${encodeURIComponent('Hi '+fu.customerName+', just following up on the recent plumbing work. Everything going well? Thanks! '+biz.contact+' — '+biz.name)}');App.closeModal()">📱 Text</button>` : ''}
+        ${phone ? `<button class="btn btn-outline" onclick="window.open('tel:${phone}');App.closeModal()">📞 Call</button>` : ''}
+        ${!email && !phone ? '<p style="color:var(--text-muted);text-align:center">No contact info on file</p>' : ''}
+      </div>
+    `);
   },
 
   viewAll() {
