@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Halluc Plumbing — Business Manager</title>
+  <meta name="theme-color" content="#D4AF37">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#92400e;color:#fef3c7;text-align:center;padding:8px 16px;font-size:14px;font-weight:600">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#fbbf24;margin-right:8px;animation:pulse 1.5s infinite"></span>
+      You're offline — changes save locally and won't be lost
+    </div>
+
+  <div id="app">
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar">
+      <div class="brand">
+        <div class="logo-icon">🔧</div>
+        <div class="brand-text">
+          <h1>Halluc</h1>
+          <span>Plumbing</span>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li class="nav-section-label">Daily</li>
+        <li><a href="#dashboard" class="nav-link active" data-page="dashboard">
+          <span class="icon" id="nav-icon-dashboard"></span><span class="label">Dashboard</span>
+        </a></li>
+        <li><a href="#scheduler" class="nav-link" data-page="scheduler">
+          <span class="icon" id="nav-icon-scheduler"></span><span class="label">Scheduler</span>
+        </a></li>
+        <li><a href="#eod" class="nav-link" data-page="eod">
+          <span class="icon" id="nav-icon-eod"></span><span class="label">End-of-Day</span>
+        </a></li>
+        <li class="nav-section-label">Billing</li>
+        <li><a href="#quotes" class="nav-link" data-page="quotes">
+          <span class="icon" id="nav-icon-quotes"></span><span class="label">Quotes</span>
+        </a></li>
+        <li><a href="#invoices" class="nav-link" data-page="invoices">
+          <span class="icon" id="nav-icon-invoices"></span><span class="label">Invoices</span>
+        </a></li>
+        <li><a href="#customers" class="nav-link" data-page="customers">
+          <span class="icon" id="nav-icon-customers"></span><span class="label">Customers</span>
+        </a></li>
+        <li class="nav-section-label">Operations</li>
+        <li><a href="#maintenance" class="nav-link" data-page="maintenance">
+          <span class="icon" id="nav-icon-maintenance"></span><span class="label">Maintenance</span>
+        </a></li>
+        <li><a href="#warranty" class="nav-link" data-page="warranty">
+          <span class="icon" id="nav-icon-warranty"></span><span class="label">Warranty</span>
+        </a></li>
+        <li><a href="#followups" class="nav-link" data-page="followups">
+          <span class="icon" id="nav-icon-followups"></span><span class="label">Follow-Ups</span>
+        </a></li>
+        <li class="nav-section-label">Settings</li>
+        <li><a href="#rates" class="nav-link" data-page="rates">
+          <span class="icon" id="nav-icon-rates"></span><span class="label">Rates</span>
+        </a></li>
+        <li><a href="#tracker" class="nav-link" data-page="tracker">
+          <span class="icon" id="nav-icon-tracker"></span><span class="label">Profit Tracker</span>
+        </a></li>
+        <li><a href="#discounts" class="nav-link" data-page="discounts">
+          <span class="icon" id="nav-icon-discounts"></span><span class="label">Discounts</span>
+        </a></li>
+        <li><a href="#settings" class="nav-link" data-page="settings">
+          <span class="icon" id="nav-icon-settings"></span><span class="label">Settings</span>
+        </a></li>
+      </ul>
+      <div class="sidebar-actions">
+        <button class="sidebar-action-btn" id="cmd-palette-btn" title="Search (Ctrl+K)">
+          <span id="cmd-icon"></span>
+          <span class="label">Search</span>
+          <kbd>Ctrl+K</kbd>
+        </button>
+        <button class="sidebar-action-btn" id="dark-mode-toggle" title="Toggle dark mode">
+          <span id="theme-icon"></span>
+        </button>
+      </div>
+      <div class="sidebar-footer">
+        <div class="contact-info">
+          <small id="sidebar-contact">Justin Taylor</small>
+          <small id="sidebar-phone">519-350-8772</small>
+          <small id="sidebar-address">Chatham, ON</small>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Header -->
+    <header id="mobile-header">
+      <button id="menu-toggle" aria-label="Toggle menu">☰</button>
+      <h1>Halluc Plumbing</h1>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="content">
+      <!-- Pages are rendered here by JS -->
+    </main>
+  </div>
+
+  <!-- Modal Overlay -->
+  <div id="modal-overlay" class="hidden">
+    <div id="modal-content"></div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container"></div>
+
+  <script src="data/flat-rates.js"></script>
+  <script src="icons.js"></script>
+  <script src="signature.js"></script>
+  <script src="app.js"></script>
+  <script src="pages/dashboard.js"></script>
+  <script src="pages/quotes.js"></script>
+  <script src="pages/invoices.js"></script>
+  <script src="pages/scheduler.js"></script>
+  <script src="pages/rates.js"></script>
+  <script src="pages/customers.js"></script>
+  <script src="pages/tracker.js"></script>
+  <script src="pages/maintenance.js"></script>
+  <script src="pages/warranty.js"></script>
+  <script src="pages/eod.js"></script>
+  <script src="pages/discounts.js"></script>
+  <script src="pages/followups.js"></script>
+  <script src="pages/settings.js"></script>
+  <script src="pages/quote-request.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
