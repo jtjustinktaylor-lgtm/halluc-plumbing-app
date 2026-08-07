@@ -105,14 +105,21 @@ const Scheduler = {
       <div class="form-group">
         <label>📷 Photos (${photoCount})</label>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px" id="jf-photos">
-          ${j.photos.map((p,idx) => `<div style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--border-light)">
+          ${j.photos.map((p,idx) => `<div style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--border-light)" onclick="Scheduler.viewPhoto('${id}',${idx})">
             <img src="${p.url}" alt="${App.escapeHtml(p.caption||p.name)}" style="width:100%;height:100%;object-fit:cover">
-            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;font-size:9px;padding:2px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${App.escapeHtml(p.caption||'')}</div>
-            <button onclick="Scheduler.removePhoto('${id}',${idx})" style="position:absolute;top:2px;right:2px;background:rgba(220,38,38,0.85);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1">✕</button>
+            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;font-size:9px;padding:2px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.tag === 'before' ? '📷 B' : p.tag === 'after' ? '📷 A' : ''} ${App.escapeHtml(p.caption||'')}</div>
+            <button onclick="event.stopPropagation();Scheduler.removePhoto('${id}',${idx})" style="position:absolute;top:2px;right:2px;background:rgba(220,38,38,0.85);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1">✕</button>
           </div>`).join('')}
         </div>
-        <input type="file" id="jf-photo-input" accept="image/*" multiple style="display:none" onchange="Scheduler.handlePhotoUpload('${id}',this.files)">
-        <button class="btn btn-sm btn-outline" onclick="document.getElementById('jf-photo-input').click()">📷 Add Photos</button>
+        <input type="file" id="jf-photo-input" accept="image/*" multiple style="display:none" onchange="Scheduler.handlePhotoUpload('${id}',this.files,'')">
+        <input type="file" id="jf-photo-before" accept="image/*" multiple style="display:none" onchange="Scheduler.handlePhotoUpload('${id}',this.files,'before')">
+        <input type="file" id="jf-photo-after" accept="image/*" multiple style="display:none" onchange="Scheduler.handlePhotoUpload('${id}',this.files,'after')">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('jf-photo-input').click()">📷 Add Photos</button>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('jf-photo-before').click()">📷 Before</button>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('jf-photo-after').click()">📷 After</button>
+          ${j.photos.some(p=>p.tag==='before') && j.photos.some(p=>p.tag==='after') ? `<button class="btn btn-sm btn-primary" onclick="Scheduler.comparePhotos('${id}')">🔄 Compare</button>` : ''}
+        </div>
       </div>
 
       <div class="modal-footer">
@@ -141,7 +148,7 @@ const Scheduler = {
     App.saveState(); App.closeModal(); App.handleRoute(); App.toast('Job saved');
   },
 
-  handlePhotoUpload(jobId, files) {
+  handlePhotoUpload(jobId, files, tag) {
     const j = App.state.jobs.find(x => x.id === jobId);
     if (!j) return;
     if (!j.photos) j.photos = [];
@@ -165,7 +172,8 @@ const Scheduler = {
             url: compressed,
             name: file.name,
             date: App.today(),
-            caption: ''
+            caption: '',
+            tag: tag || ''
           });
           App.saveState();
           this.edit(jobId);
@@ -183,6 +191,53 @@ const Scheduler = {
     j.photos.splice(photoIdx, 1);
     App.saveState();
     this.edit(jobId);
+  },
+
+  viewPhoto(jobId, idx) {
+    const j = App.state.jobs.find(x => x.id === jobId);
+    if (!j || !j.photos || !j.photos[idx]) return;
+    const p = j.photos[idx];
+    App.openModal(`
+      <div class="modal-header"><h3>📷 Photo${p.tag ? ' — ' + p.tag.charAt(0).toUpperCase() + p.tag.slice(1) : ''}</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
+      <div style="text-align:center;padding:12px 0">
+        <img src="${p.url}" alt="${App.escapeHtml(p.caption||p.name)}" style="max-width:100%;max-height:70vh;border-radius:8px">
+        <div style="margin-top:8px;color:var(--text-muted);font-size:13px">${p.name} — ${App.formatDate(p.date)}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+          <button class="btn btn-sm ${p.tag==='before'?'btn-primary':'btn-outline'}" onclick="Scheduler._setPhotoTag('${jobId}',${idx},'before');App.closeModal()">📷 Before</button>
+          <button class="btn btn-sm ${p.tag==='after'?'btn-primary':'btn-outline'}" onclick="Scheduler._setPhotoTag('${jobId}',${idx},'after');App.closeModal()">📷 After</button>
+          ${p.tag ? `<button class="btn btn-sm btn-outline" onclick="Scheduler._setPhotoTag('${jobId}',${idx},'');App.closeModal()">Remove Tag</button>` : ''}
+        </div>
+      </div>
+    `);
+  },
+
+  _setPhotoTag(jobId, idx, tag) {
+    const j = App.state.jobs.find(x => x.id === jobId);
+    if (!j || !j.photos || !j.photos[idx]) return;
+    j.photos[idx].tag = tag;
+    App.saveState();
+    this.edit(jobId);
+  },
+
+  comparePhotos(jobId) {
+    const j = App.state.jobs.find(x => x.id === jobId);
+    if (!j || !j.photos) return;
+    const befores = j.photos.filter(p => p.tag === 'before');
+    const afters = j.photos.filter(p => p.tag === 'after');
+    if (!befores.length || !afters.length) return;
+    App.openModal(`
+      <div class="modal-header"><h3>🔄 Before & After</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0">
+        <div>
+          <div style="text-align:center;font-weight:700;color:var(--danger);margin-bottom:8px">📷 Before</div>
+          ${befores.map(p => `<img src="${p.url}" style="width:100%;border-radius:8px;margin-bottom:8px">`).join('')}
+        </div>
+        <div>
+          <div style="text-align:center;font-weight:700;color:var(--success);margin-bottom:8px">📷 After</div>
+          ${afters.map(p => `<img src="${p.url}" style="width:100%;border-radius:8px;margin-bottom:8px">`).join('')}
+        </div>
+      </div>
+    `);
   },
 
   toInvoice(jobId) {
