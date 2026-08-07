@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#1a2332",
   "theme_color": "#D4AF37",
-  "description": "Business management app for Halluc Plumbing",
+  "description": "Business management app for Halluc Plumbing — quotes, invoices, scheduling, mileage tracking, inventory, and more",
   "icons": [
     {
       "src": "assets/icon.svg",
