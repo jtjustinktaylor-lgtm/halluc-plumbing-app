@@ -669,6 +669,12 @@ const App = {
         rows.push(['Expense', e.id, e.date, e.vendor||'', e.desc, '', '', e.amount, '', e.category||'', '', '']);
       });
       filename = 'halluc-plumbing-annual-report-' + this.today() + '.csv';
+    } else if (type === 'mileage') {
+      rows.push(['Date','Miles','Purpose','Route']);
+      (this.state.mileage || []).forEach(m => {
+        rows.push([m.date, m.miles, m.purpose||'', m.route||'']);
+      });
+      filename = 'halluc-plumbing-mileage-' + this.today() + '.csv';
     }
     const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
