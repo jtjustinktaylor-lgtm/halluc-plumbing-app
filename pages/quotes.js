@@ -113,6 +113,7 @@ const Quotes = {
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="Quotes._print('${q.id}')">🖨️ Print</button>
         <button class="btn btn-outline" onclick="Quotes._emailQuoteDirect('${q.id}')">📧 Email</button>
+        <button class="btn btn-outline" onclick="Quotes._save('${q.id}');Quotes._sms('${q.id}');App.closeModal()">📱 Text</button>
         <button class="btn btn-outline" onclick="Quotes._save('${q.id}');App.closeModal()">Save</button>
         <button class="btn btn-primary" onclick="Quotes._save('${q.id}');Quotes._send('${q.id}');App.closeModal()">Save & Send</button>
       </div>`;
@@ -221,6 +222,17 @@ const Quotes = {
       (q.depositAmount ? `\n\nDeposit required: ${App.formatCurrency(q.depositAmount)}${q.depositType==='percent'?' ('+q.depositValue+'% of total)':''}\nDeposit must be received before work begins.` : '') +
       `\n\nPlease reply to confirm or call ${biz.phone}.\n\nThanks,\n${biz.contact}\n${biz.name}`;
     window.open(`mailto:${q.customerEmail}?subject=Quote #${q.number} — ${biz.name}&body=${encodeURIComponent(body)}`);
+  },
+  _sms(qid) {
+    const q = App.state.quotes.find(x => x.id === qid);
+    if (!q) return;
+    const biz = App.getBusinessInfo();
+    const cust = (App.state.customers || []).find(c => c.name === q.customer);
+    const phone = cust?.phone || '';
+    if (!phone) { App.toast('No phone number for this customer'); return; }
+    const body = `Hi ${q.customer}, here's your quote #${q.number} from ${biz.name} — Total: ${App.formatCurrency(q.total)}. Please reply to confirm or call ${biz.phone}. Thanks! ${biz.contact}`;
+    const cleanPhone = phone.replace(/\D/g, '');
+    window.open(`sms:${cleanPhone}?body=${encodeURIComponent(body)}`);
   },
   view(id) { this.edit(id); },
   toInvoice(id) {
