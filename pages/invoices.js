@@ -83,6 +83,7 @@ const Invoices = {
       <div class="form-group"><label>Notes</label><textarea class="form-control" id="if-notes">${inv.notes||''}</textarea></div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="Invoices._save('${inv.id}');App.closeModal()">Save</button>
+        <button class="btn btn-outline" onclick="Invoices._save('${inv.id}');Invoices._sms('${inv.id}');App.closeModal()">📱 Text</button>
         <button class="btn btn-primary" onclick="Invoices._save('${inv.id}');Invoices._email('${inv.id}');App.closeModal()">Save & Email</button>
       </div>`;
   },
@@ -152,6 +153,17 @@ const Invoices = {
       `\n\nSubtotal: ${App.formatCurrency(inv.subtotal)}\nHST: ${App.formatCurrency(inv.tax)}\nTotal: ${App.formatCurrency(inv.total)}` +
       `\n\nPayment due: ${inv.dueDate || 'Upon receipt'}\nPlease send e-transfer to ${biz.phone} or call to arrange payment.\n\nThanks,\n${biz.contact}\n${biz.name}`;
     window.open(`mailto:${inv.customerEmail}?subject=Invoice #${inv.number} — ${biz.name}&body=${encodeURIComponent(body)}`);
+  },
+  _sms(invId) {
+    const inv = App.state.invoices.find(x => x.id === invId);
+    if (!inv) return;
+    const biz = App.getBusinessInfo();
+    const cust = (App.state.customers || []).find(c => c.name === inv.customer);
+    const phone = cust?.phone || '';
+    if (!phone) { App.toast('No phone number for this customer'); return; }
+    const body = `Hi ${inv.customer}, Invoice #${inv.number} from ${biz.name} — Total: ${App.formatCurrency(inv.total)}. Due: ${inv.dueDate || 'Upon receipt'}. Please send e-transfer to ${biz.phone} or call to arrange payment. Thanks! ${biz.contact}`;
+    const cleanPhone = phone.replace(/\D/g, '');
+    window.open(`sms:${cleanPhone}?body=${encodeURIComponent(body)}`);
   },
   markPaid(id) {
     const inv = App.state.invoices.find(x => x.id === id);
