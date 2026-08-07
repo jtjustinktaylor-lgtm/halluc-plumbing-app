@@ -79,6 +79,12 @@ const Customers = {
         ${outstanding > 0 ? `<div><strong>Outstanding:</strong><br><span style="color:var(--danger);font-weight:700">${App.formatCurrency(outstanding)}</span></div>` : ''}
       </div>
       ${c.notes ? `<div style="margin-bottom:16px;padding:12px;background:var(--bg);border-radius:8px"><strong>Notes:</strong> ${c.notes}</div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        ${c.phone ? `<button class="btn btn-sm btn-outline" onclick="window.open('tel:${c.phone}')">📞 Call</button>` : ''}
+        ${c.phone ? `<button class="btn btn-sm btn-outline" onclick="window.open('sms:${c.phone.replace(/\D/g,'')}?body=${encodeURIComponent('Hi '+c.name+', this is '+App.getBusinessInfo().contact+' from '+App.getBusinessInfo().name+'. ')}')">📱 Text</button>` : ''}
+        ${c.email ? `<button class="btn btn-sm btn-outline" onclick="window.open('mailto:${c.email}')">📧 Email</button>` : ''}
+        ${c.address ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address)}" target="_blank" class="btn btn-sm btn-outline">📍 Directions</a>` : ''}
+      </div>
 
       ${jobs.length > 0 ? `
       <h4 style="margin:16px 0 8px;color:var(--navy)">Jobs (${jobs.length})</h4>
