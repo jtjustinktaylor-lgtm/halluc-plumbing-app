@@ -44,6 +44,17 @@ Pages.eod = function() {
   const expensesToday = (s.expenses || []).filter(e => e.date === today);
   const expensesTodayTotal = expensesToday.reduce((sum, e) => sum + (e.amount || 0), 0);
 
+  // Mileage today
+  const mileageToday = (s.mileage || []).filter(m => m.date === today);
+  const milesToday = mileageToday.reduce((sum, m) => sum + (m.miles || 0), 0);
+  const mileageRate = s.mileageRate || 0.70; // CRA rate 2024
+  const mileageDeduction = milesToday * mileageRate;
+
+  // Mileage this month
+  const monthStart = today.slice(0, 7);
+  const mileageMonth = (s.mileage || []).filter(m => m.date && m.date.startsWith(monthStart));
+  const milesMonth = mileageMonth.reduce((sum, m) => sum + (m.miles || 0), 0);
+
   // Profit
   const profitToday = revenueToday - expensesTodayTotal;
   const totalCustomers = (s.customers || []).length;
@@ -59,6 +70,7 @@ Pages.eod = function() {
 
     <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="App.printSection(document.getElementById('eod-report').innerHTML, 'End-of-Day Report — ${today}')">🖨️ Print Report</button>
+      <button class="btn btn-outline" onclick="EOD.logMileage()">🚗 Log Miles</button>
     </div>
 
     <div id="eod-report">
@@ -79,6 +91,22 @@ Pages.eod = function() {
         <div class="stat-card">
           <div class="stat-value">${App.formatCurrency(totalRevenue)}</div>
           <div class="stat-label">Total Revenue (All Time)</div>
+        </div>
+      </div>
+
+      <!-- Mileage -->
+      <div class="grid grid-3" style="margin-bottom:16px">
+        <div class="stat-card">
+          <div class="stat-value">${milesToday.toFixed(1)}</div>
+          <div class="stat-label">Miles Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${App.formatCurrency(mileageDeduction)}</div>
+          <div class="stat-label">Deduction Today ($${mileageRate}/mi)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${milesMonth.toFixed(1)}</div>
+          <div class="stat-label">Miles This Month</div>
         </div>
       </div>
 
@@ -160,4 +188,35 @@ Pages.eod = function() {
 };
 
 PageInit.eod = function() {};
-const EOD = {};
+const EOD = {
+  logMileage() {
+    const today = App.today();
+    App.openModal(`
+      <div class="modal-header"><h3>🚗 Log Mileage</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
+      <div class="form-group"><label>Date</label><input class="form-control" id="ml-date" type="date" value="${today}"></div>
+      <div class="form-group"><label>Miles</label><input class="form-control" id="ml-miles" type="number" step="0.1" min="0" placeholder="e.g. 45.5"></div>
+      <div class="form-group"><label>Purpose</label><input class="form-control" id="ml-purpose" placeholder="e.g. Job at 123 Main St, supply run"></div>
+      <div class="form-group"><label>From → To (optional)</label><input class="form-control" id="ml-route" placeholder="e.g. Home → 123 Main St → Home"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="EOD._saveMileage()">Log Miles</button>
+      </div>
+    `);
+  },
+  _saveMileage() {
+    const miles = parseFloat(document.getElementById('ml-miles').value);
+    if (!miles || miles <= 0) return App.toast('Enter miles driven', 'error');
+    if (!App.state.mileage) App.state.mileage = [];
+    App.state.mileage.push({
+      id: App.genId(),
+      date: document.getElementById('ml-date').value || App.today(),
+      miles,
+      purpose: document.getElementById('ml-purpose').value,
+      route: document.getElementById('ml-route').value
+    });
+    App.saveState();
+    App.closeModal();
+    App.handleRoute();
+    App.toast(`${miles} miles logged`);
+  }
+};
