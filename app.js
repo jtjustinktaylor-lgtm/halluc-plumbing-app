@@ -312,7 +312,7 @@ const App = {
       'nav-icon-invoices': 'invoices', 'nav-icon-scheduler': 'scheduler',
       'nav-icon-rates': 'rates', 'nav-icon-customers': 'customers',
       'nav-icon-tracker': 'tracker', 'nav-icon-maintenance': 'maintenance',
-      'nav-icon-discounts': 'discounts', 'nav-icon-quote-request': 'quoteRequest', 'nav-icon-warranty': 'warranty', 'nav-icon-followups': 'scheduler', 'nav-icon-eod': 'dashboard', 'nav-icon-settings': 'rates', 'cmd-icon': 'search',
+      'nav-icon-discounts': 'discounts', 'nav-icon-quote-request': 'quoteRequest', 'nav-icon-warranty': 'warranty', 'nav-icon-followups': 'scheduler', 'nav-icon-eod': 'dashboard', 'nav-icon-settings': 'rates', 'nav-icon-mileage': 'tracker', 'nav-icon-inventory': 'tracker', 'cmd-icon': 'search',
     };
     Object.entries(iconMap).forEach(([elId, iconName]) => {
       const el = document.getElementById(elId);
@@ -397,6 +397,8 @@ const App = {
       { id: 'warranty', label: 'Warranty', hint: 'Warranty tracking' },
       { id: 'followups', label: 'Follow-Ups', hint: 'Post-job customer follow-ups' },
       { id: 'eod', label: 'End-of-Day Report', hint: 'Daily summary & print' },
+      { id: 'mileage', label: 'Mileage', hint: 'Travel tracking & deductions' },
+      { id: 'inventory', label: 'Inventory', hint: 'Parts & supplies tracking' },
       { id: 'discounts', label: 'Discounts', hint: 'Promotions & deals' },
       { id: 'settings', label: 'Settings', hint: 'Backup, Formspree, config' },
     ];
@@ -531,10 +533,12 @@ const App = {
       link.classList.toggle('active', link.dataset.page === hash);
     });
     const content = document.getElementById('content');
-    const renderer = Pages[hash];
+    // Support parameterized routes: try exact match first, then base route
+    const baseRoute = hash.split('/')[0];
+    const renderer = Pages[hash] || Pages[baseRoute];
     if (renderer) {
       content.innerHTML = renderer();
-      if (PageInit && PageInit[hash]) PageInit[hash]();
+      if (PageInit && PageInit[baseRoute]) PageInit[baseRoute]();
       this.injectPageIcons();
     } else {
       content.innerHTML = '<div class="empty-state"><div class="icon">🚧</div><h3>Page not found</h3></div>';
