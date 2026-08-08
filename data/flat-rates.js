@@ -108,6 +108,8 @@ const FLAT_RATES = {
       { id: 'p12', desc: 'Whole-house re-pipe (PEX)', price: 4500 },
       { id: 'p13', desc: 'Whole-house re-pipe (copper)', price: 7500 },
       { id: 'p14', desc: 'Water pressure regulator install', price: 325 },
+    ]
+  },
   appliances: {
     label: 'Appliance Hookups',
     items: [
@@ -143,6 +145,8 @@ const FLAT_RATES = {
       { id: 'g5', desc: 'Gas leak detection', price: 195 },
       { id: 'g6', desc: 'Gas pressure test', price: 175 },
       { id: 'g7', desc: 'Gas meter relocation', price: 650 },
+    ]
+  },
   bathroom: {
     label: 'Bathroom Plumbing',
     items: [
@@ -158,6 +162,8 @@ const FLAT_RATES = {
       { id: 'b10', desc: 'Bathroom addition — full rough-in', price: 3500 },
       { id: 'b11', desc: 'Shower pan — mortar bed install', price: 650 },
       { id: 'b12', desc: 'Shower pan — prefab acrylic', price: 475 },
+    ]
+  },
   kitchen: {
     label: 'Kitchen Plumbing',
     items: [
@@ -165,6 +171,8 @@ const FLAT_RATES = {
       { id: 'k2', desc: 'Instant hot water dispenser install', price: 385 },
       { id: 'k3', desc: 'Dishwasher drain connection', price: 195 },
       { id: 'k4', desc: 'Fridge water line — new install', price: 225 },
+    ]
+  },
   sewer: {
     label: 'Sewer & Drain',
     items: [
@@ -181,6 +189,8 @@ const FLAT_RATES = {
       { id: 's11', desc: 'Backwater valve install', price: 650 },
       { id: 's12', desc: 'Sewer line locates', price: 195 },
       { id: 's13', desc: 'Storm drain cleanout', price: 275 },
+    ]
+  },
   waterTreatment: {
     label: 'Water Treatment',
     items: [
@@ -198,6 +208,8 @@ const FLAT_RATES = {
       { id: 'wt12', desc: 'Water conditioner repair', price: 250 },
       { id: 'wt13', desc: 'Acid neutralizer install', price: 1200 },
       { id: 'wt14', desc: 'Whole-house carbon filter install', price: 950 },
+    ]
+  },
   emergency: {
     label: 'Emergency Services',
     items: [
@@ -228,6 +240,8 @@ const FLAT_RATES = {
       { id: 'r4', desc: 'Fixture package install — bathroom (5pc)', price: 1800 },
       { id: 'r5', desc: 'Fixture package install — kitchen', price: 950 },
       { id: 'r6', desc: 'Basement bathroom rough-in', price: 3500 },
+    ]
+  },
   commercial: {
     label: 'Commercial Plumbing',
     items: [
