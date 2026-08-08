@@ -1,6 +1,10 @@
 // Halluc Plumbing — App Core
 // Routing, state, navigation, utilities
 
+// Page renderers and initializers — declared first so page scripts can register
+var Pages = {};
+var PageInit = {};
+
 const App = {
   currentPage: 'dashboard',
   state: {},
@@ -731,10 +735,6 @@ const App = {
     win.print();
   },
 };
-
-// Page renderers and initializers
-const Pages = {};
-const PageInit = {};
 
 // Boot
 document.addEventListener('DOMContentLoaded', () => App.init());
